@@ -22,3 +22,14 @@
 body {
 	background-color: var(--color-default);
 }
+
+
+.ant-picker {
+	border: none;
+	box-shadow: none;
+}
+
+:where(.css-dev-only-do-not-override-19lec04).ant-picker-outlined:focus, :where(.css-dev-only-do-not-override-19lec04).ant-picker-outlined:focus-within {
+	border: none;
+	box-shadow: none;
+}

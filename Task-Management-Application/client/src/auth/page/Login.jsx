@@ -39,33 +39,25 @@ export function SimpleLoginForm() {
   const { theme } = useTheme();
 
   return (
-     <card className={`${theme === "dark" ? "bg-transparent":""} font-montserrat pt-24 pb-16 flex flex-col mx-auto items-center`} shadow={false}>
-      <h1 className={`font ${theme === "dark" ? "text-gray-400":"text-black"} text-4xl`}>
-        Log In
-      </h1>
-      <p className={`${theme === "dark" ? "text-gray-500":"text-black"} mt-4 text-sm font-normal`}>
-        Welcome Back! Enter your email and password.
-      </p>
+     <card className={`${theme === "black" ? "bg-transparent":""} font-montserrat pt-24 pb-16 flex flex-col mx-auto items-center`} shadow={false}>
+      <h1 className={`${theme === "black" ? "text-white":"text-black"} text-4xl`}> Log In </h1>
+      <p className={`${theme === "black" ? "text-white":"text-black"} mt-4 text-sm font-normal`}> Welcome Back! Enter your email and password. </p>
       <SocialLogin />
       <form onSubmit={handleLogIn} className="mb-2 w-80 max-w-screen-lg sm:w-96">
         <div className="mb-1 flex flex-col gap-6">
-          <h3 variant="h6" className={`${theme === "dark" ? "text-gray-400":"text-black"} -mb-3`}>
-            Your Email
-          </h3>
-          <input type="text" {...register("email", { required: true })} placeholder="name@mail.com" className="input input-bordered w-full" />
+          <h3 className={`${theme === "black" ? "text-white":"text-black"} -mb-3`}> Your Email </h3>
+          <input type="text" {...register("email", { required: true })} placeholder="name@mail.com" className="input input-bordered rounded-lg w-full" />
           {errors.email && <span className="text-red-500 font-medium"> Please enter your email! </span>}
-          <h3 variant="h6" className={`${theme === "dark" ? "text-gray-400":"text-black"} -mb-3`}>
-            Password
-          </h3>
-          <input type="password" {...register("password", { required: true })} placeholder="********" className="input input-bordered w-full" />
+          <h3 className={`${theme === "black" ? "text-white":"text-black"} -mb-3`}> Password </h3>
+          <input type="password" {...register("password", { required: true })} placeholder="********" className="input input-bordered rounded-lg w-full" />
           {errors.password && <span className="text-red-500 font-medium"> Please enter your password! </span>}
         </div>
-        <button type="submit" className={`${theme === "dark" ? "bg-white text-black border border-white":""} font-montserrat mt-6`} fullWidth>
+        <button type="submit" className={`w-full py-2 rounded-lg ${theme === "black" ? "bg-white text-black border border-white": "bg-black text-white"} font-montserrat mt-6`} fullWidth>
           Login
         </button>
-        <p className={`${theme === "dark" ? "text-gray-500":"text-black"} font-montserrat mt-4 text-sm text-center font-normal`}>
+        <p className={`${theme === "black" ? "text-white":"text-black"} font-montserrat mt-4 text-sm text-center font-normal`}>
           Don't have an account?
-          <Link to={"/register"} className={`${theme === "dark" ? "text-white":""} ml-1`}>
+          <Link to={"/register"} className={`${theme === "black" ? "text-white":""} ml-1`}>
           Register
           </Link>
         </p>

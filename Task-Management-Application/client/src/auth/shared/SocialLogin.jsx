@@ -17,9 +17,9 @@ const SocialLogin = () => {
       const userInfo = {
         name: user?.displayName,
         email: user?.email,
+        uid: user?.uid,
+        role: 'User',
         image: user?.photoURL,
-        role: 'Employee',
-        isVerified: false,
       };
 
       const response = await axiosPublic.post("/users", userInfo);
@@ -39,17 +39,9 @@ const SocialLogin = () => {
   const { theme } = useTheme();
 
   return (
-    <div className='justify-center items-center mt-4 space-x-2 cursor-pointer' >
-      <button 
-        onClick={handleGoogleSignIn}
-        variant="outlined"
-        className={`${theme === "dark" ? "bg-none text-gray-300 border border-gray-300":""} flex w-full items-center justify-center gap-2 font-montserrat`}
-      >
-        <img
-          src="https://docs.material-tailwind.com/icons/google.svg"
-          alt="google"
-          className="h-4 w-4"
-        />
+    <div className='justify-center items-center space-x-2 cursor-pointer w-80 max-w-screen-lg sm:w-96' >
+      <button onClick={handleGoogleSignIn} className={`w-full py-2 rounded-lg border flex gap-2 items-center justify-center mt-6 ${theme === "black" ? "bg-black text-white hover:bg-white hover:text-black border-white": "bg-white hover:text-white text-black hover:bg-black border-black"}`} fullWidth>
+        <img src="https://docs.material-tailwind.com/icons/google.svg" alt="google" className="h-4 w-4" />
         Sign in with Google
       </button>
       <div className="my-4 flex items-center gap-2">

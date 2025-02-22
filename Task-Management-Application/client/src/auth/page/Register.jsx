@@ -1,54 +1,50 @@
-import { Card, Input, Button, Typography, Select, Option } from "@material-tailwind/react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../hook/useAuth";
 import useAxiosPublic from "../hook/useAxiosPublic";
-import { AiOutlineMail } from "react-icons/ai";
-import { CiImageOn, CiUser } from "react-icons/ci";
-import { MdAccountBalance, MdAttachMoney } from "react-icons/md";
-import { TbLockPassword } from "react-icons/tb";
 import { toast } from 'react-hot-toast';
 import SocialLogin from "../shared/SocialLogin";
 import useTheme from "../../theme/hook/useTheme";
+import useAuth from "../hook/useAuth";
 
 const image_hosting_api = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API_KEY}`;
 
 export function SimpleRegisterForm() {
   const axiosPublic = useAxiosPublic();
-  const { handleSubmit, register, reset, control, formState: { errors } } = useForm();
+  const { handleSubmit, register, reset, formState: { errors } } = useForm();
   const { createUser, updateUserProfile } = useAuth();
   const navigate = useNavigate();
 
   const handleSignup = async (data) => {
     try {
+      // Upload Image to Hosting API
       const imageFile = { image: data.image[0] };
       const res = await axiosPublic.post(image_hosting_api, imageFile, {
         headers: { 'content-type': 'multipart/form-data' }
       });
 
-      if (res.data.success) {
-        await createUser(data.email, data.password);
+      if (res.data && res.data.success) {
+        // Create User in Firebase
+        const result = await createUser(data.email, data.password);
+
+        // Update User Profile in Firebase
         await updateUserProfile(data.name, res.data.data.display_url);
 
+        // Prepare User Data for Database
         const userInfo = {
-          name: data.name,
-          email: data.email,
-          designation: data.designation,
-          salary: parseFloat(data.salary),
-          bank_account_no: parseFloat(data.bank_account_no),
-          role: data.role,
-          image: res.data.data.display_url,
-          isVerified: false,
+          name: result.user?.displayName,
+          email: result.user?.email,
+          uid: result.user?.uid,
+          role: 'User',
+          image: result.user?.photoURL,
         };
 
-        console.log(userInfo)
-
+        // Save User Data in Database
         const response = await axiosPublic.post("/users", userInfo);
 
         console.log(response)
 
         if (response.data.insertedId) {
-          toast.success("Data Save Successful!");
+          toast.success("Registration Successful!");
           reset();
           navigate("/");
         };
@@ -62,91 +58,53 @@ export function SimpleRegisterForm() {
   const { theme } = useTheme();
 
   return (
-    <Card className={`${theme === "dark" ? "bg-transparent":""} font-montserrat pt-24 pb-16 flex mx-auto items-center`} shadow={false}>
-      <Typography className={`${theme === "dark" ? "text-gray-400":"text-black"} text-4xl`} variant="h4"> Register </Typography>
-      <Typography className={`${theme === "dark" ? "text-gray-500":"text-black"} mt-4 text-sm font-normal`}>
+    <div className={`${theme === "black" ? "bg-transparent":""} font-montserrat p-16 flex flex-col mx-auto items-center`} shadow={false}>
+      <h1 className={`${theme === "black" ? "text-white":"text-black"} text-4xl`} variant="h4"> Register </h1>
+      <p className={`${theme === "black" ? "text-white":"text-black"} mt-4 text-sm font-normal`}>
         Nice to meet you! Enter your details to register.
-      </Typography>
+      </p>
       <SocialLogin />
-      <form onSubmit={handleSubmit(handleSignup)} className="mb-2">
-        <div className="mb-1 grid md:grid-cols-2 sm:grid-cols-1 gap-5 max-w-lg">
+      <form onSubmit={handleSubmit(handleSignup)} className="mb-2 w-80 max-w-screen-lg sm:w-96">
+        <div className="mb-1 flex flex-col gap-6">
           {/* Name */}
-          <div className="">
-            <Input label="Name" className="focus:outline focus:outline-1 focus:outline-white" placeholder="abdullah" {...register("name", { required: "Please enter your Name!" })} icon={<CiUser />} />
-          </div>
+          <h3 className={`${theme === "black" ? "text-white":"text-black"} -mb-3`}> Your Name </h3>
+          <input type="text" {...register("name", { required: "Please enter your Name!" })} placeholder="Abdullah" className="input input-bordered rounded-lg w-full" />
 
           {/* Email */}
-          <div className="">
-            <Input label="Email" className="focus:outline focus:outline-1 focus:outline-white" placeholder="name@mail.com" {...register("email", { required: "Please enter your Email!" })} icon={<AiOutlineMail />} />
-          </div>
-
-          {/* Role */}
-          <div className="">
-            <Controller name="role" className="focus:outline focus:outline-1 focus:outline-white" control={control} rules={{ required: "Please select your Role!" }} render={({ field }) => (
-              <Select {...field} label="Your Role" className="">
-                <Option value="HR" className="">HR</Option>
-                <Option value="Employee">Employee</Option>
-              </Select>
-              )}/>
-          </div>
-
-          {/* Designation */}
-          <div className="">
-            <Controller name="designation" control={control} defaultValue="" rules={{ required: "Please select your Designation!" }} render={({ field }) => (
-              <Select {...field} label="Your Designation">
-                <Option value="Web Developer">Web Developer</Option>
-                <Option value="Graphics Designer">Graphics Designer</Option>
-                <Option value="Digital Marketer">Digital Marketer</Option>
-                <Option value="Sales Assistant">Sales Assistant</Option>
-                <Option value="Social Media Executive">Social Media Executive</Option>
-              </Select>
-            )} />
-          </div>
-
-          {/* Bank Account Number */}
-          <div className="">
-            <Input className="focus:outline focus:outline-1 focus:outline-white" label="Bank Account Number" placeholder="1234567890" {...register("bank_account_no", { required: "Please enter your Bank Account Number!" })} icon={<MdAccountBalance />}
-            />
-          </div>
-
-          {/* Salary */}
-          <div className="">
-            <Input className="focus:outline focus:outline-1 focus:outline-white" label="Salary" placeholder="123456" {...register("salary", { required: "Please enter your Salary!" })} icon={<MdAttachMoney />} />
-          </div>
+          <h3 className={`${theme === "black" ? "text-white":"text-black"} -mb-3`}> Your Email </h3>
+          <input type="email" {...register("email", { required: "Please enter your Email!" })} placeholder="abdullah@mail.com" className="input input-bordered rounded-lg w-full" />
 
           {/* Image */}
-         <div className="">
-          <Input className="focus:outline focus:outline-1 focus:outline-white" label="Image" type="file" accept="image/*" {...register("image", { required: "Please upload your Profile Image!" })} icon={<CiImageOn />} />
-         </div>
+          <h3 className={`${theme === "black" ? "text-white":"text-black"} -mb-3`}> Your Profile Image </h3>
+          <input type="file" accept="image/*" {...register("image", { required: "Please upload your Profile Image!" })} className="input input-bordered rounded-lg w-full" />
 
           {/* Password */}
-          <div className="">
-            <Input className="focus:outline focus:outline-1 focus:outline-white" label="Password" placeholder="******" type="password" {...register("password", { required: true, minLength: 6, maxLength: 15, pattern: /(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z])/ })} icon={<TbLockPassword />} />
-          </div>
+          <h3 className={`${theme === "black" ? "text-white":"text-black"} -mb-3`}> Password </h3>
+          <input type="password" {...register("password", {  required: "Password is required.", minLength: { value: 6, message: "Password must be at least 6 characters long." }, maxLength: { value: 15, message: "Password must not exceed 15 characters." }, pattern: { value: /(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z])/, message: "Password must contain uppercase, lowercase, number, and special character." }})} placeholder="******" className="input input-bordered rounded-lg w-full" />
         </div>
 
+        {/* Error Messages */}
         <div className="max-w-sm text-center mx-auto">
           {Object.keys(errors).map((key) => (
             <span key={key} className="text-red-500 text-sm block">
-              {errors[key]?.message ||
-                (key === "password" && errors[key]?.type === "required" && "Password is required.") ||
-                (key === "password" && errors[key]?.type === "minLength" && "The password must be at least 6 characters long.") ||
-                (key === "password" && errors[key]?.type === "maxLength" && "The password should not exceed 15 characters.") ||
-                (key === "password" && errors[key]?.type === "pattern" && "Password must have one uppercase, one lowercase, one number, and one special character.")}
+              {errors[key]?.message}
             </span>
           ))}
         </div>
 
-        <Button type="submit" className={`${theme === "dark" ? "bg-white text-black border border-white":""} font-montserrat mt-6`} fullWidth>
+        {/* Submit Button */}
+        <button type="submit" className={`w-full py-2 rounded-lg ${theme === "black" ? "bg-white text-black border border-white": "bg-black text-white"} font-montserrat mt-6`}>
           Register
-        </Button>
-        <Typography className={`${theme === "dark" ? "text-gray-500":"text-black"} font-montserrat mt-4 text-sm text-center font-normal`}>
+        </button>
+
+        {/* Login Page Link */}
+        <p className={`${theme === "black" ? "text-white":"text-black"} font-montserrat mt-4 text-sm text-center font-normal`}>
           Already have an account?
-          <Link to={"/login"} className={`${theme === "dark" ? "text-white":""} ml-1`}>
+          <Link to={"/login"} className={`${theme === "black" ? "text-white":""} ml-1`}>
             Login
           </Link>
-        </Typography>
+        </p>
       </form>
-    </Card>
+    </div>
   );
 }
